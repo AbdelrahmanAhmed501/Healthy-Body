@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthy Body</title>
+    <style>
+        /* Custom Light Tech Theme */
+        body { font-family: -apple-system, sans-serif; background-color: #f1f5f9; color: #0f172a; margin: 0; display: flex; justify-content: center; }
+        .app-frame { width: 100%; max-width: 428px; min-height: 100vh; padding: 20px 20px 40px 20px; box-sizing: border-box; background: #f8fafc; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        
+        h1 { font-size: 24px; margin-bottom: 20px; font-weight: 800; color: #1e293b; }
+        h2 { font-size: 18px; margin-bottom: 15px; color: #334155; }
+        
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; }
+        .back-btn { background: transparent; color: #475569; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .logout-btn { color: #ef4444; cursor: pointer; font-size: 14px; font-weight: bold; }
+
+        .card { background: #ffffff; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card-title { font-size: 12px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .card-value { font-size: 24px; font-weight: 800; margin-bottom: 4px; color: #0f172a; }
+        
+        input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; background: #f8fafc; font-family: inherit; color: #0f172a; }
+        button { background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
+        button:active { background: #1d4ed8; }
+        .btn-outline { background: transparent; border: 1px solid #2563eb; color: #2563eb; }
+        .row { display: flex; gap: 10px; align-items: center; }
+        
+        .tabs { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 15px; padding-bottom: 5px; }
+        .tab { background: #e2e8f0; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; white-space: nowrap; cursor: pointer; color: #475569; }
+        .tab.active { background: #0f172a; color: #fff; }
+        
+        .set-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid #f1f5f9; }
+        .input-wrapper { display: flex; align-items: center; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; width: 75px; }
+        .input-wrapper input[type="number"] { border: none; padding: 6px; margin: 0; width: 100%; text-align: center; background: transparent; font-weight: bold; color: #0f172a; outline: none; -moz-appearance: textfield; }
+        .input-wrapper input[type="number"]::-webkit-outer-spin-button, .input-wrapper input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .input-wrapper .unit { font-size: 11px; color: #64748b; padding-right: 6px; font-weight: bold; }
+        .btn-small { padding: 6px 12px; font-size: 12px; width: auto; border-radius: 6px; }
+
+        .split-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; background: #fff; }
+        .split-item.active-split { border-color: #10b981; border-left: 4px solid #10b981; }
+        .ex-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .ex-actions { display: flex; gap: 4px; }
+        .ex-btn { background: #e2e8f0; color: #475569; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .ex-btn.del { color: #ef4444; background: #fee2e2; }
+        
+        /* Mission Tracker Styles */
+        .mission-row { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 8px; cursor: pointer; transition: background 0.3s; background: #1e293b; margin-bottom: 8px; user-select: none; }
+        .mission-row input[type="checkbox"] { width: 22px; height: 22px; margin: 0; cursor: pointer; accent-color: #10b981; }
+        .mission-row span { font-weight: bold; font-size: 15px; color: #fff; flex-grow: 1; }
+        .progress-bar-bg { background: #334155; border-radius: 10px; height: 8px; width: 100%; margin-bottom: 15px; overflow: hidden; }
+        .progress-bar-fill { background: #10b981; height: 100%; width: 0%; transition: width 0.4s ease-out; }
+        .quote-text { font-size: 13px; color: #10b981; font-weight: bold; text-align: center; margin-bottom: 12px; display: none; }
+        
+        /* Dedicated Stretch Board Styles */
+        .stretch-card { display: flex; gap: 15px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 12px; align-items: center; cursor: pointer; transition: background 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .stretch-card:active { background: #f8fafc; }
+        /* Notice object-fit is now 'contain' and size is larger */
+        .stretch-img { width: 90px; height: 90px; border-radius: 8px; object-fit: contain; background: #ffffff; flex-shrink: 0; padding: 2px; }
+        .stretch-info { flex-grow: 1; }
+        .stretch-info h3 { margin: 0 0 4px 0; font-size: 16px; color: #0f172a; }
+        .stretch-info p { margin: 0; font-size: 12px; color: #64748b; line-height: 1.4; }
+        .stretch-check { width: 24px; height: 24px; accent-color: #10b981; cursor: pointer; }
+
+        #restTimer { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #10b981; padding: 10px 20px; border-radius: 30px; font-weight: bold; font-size: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: none; z-index: 100; cursor: pointer; }
+
+        .view-section { display: none; }
+        .view-active { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="restTimer" onclick="stopTimer()">01:30</div>
+
+    <div class="app-frame">
+        <!-- LOGIN -->
+        <div id="view-login" class="view-section view-active">
+            <h1 style="text-align: center; margin-top: 60px;">Healthy <span>Body</span></h1>
+            <p style="text-align: center; color: #64748b; font-size: 14px; margin-bottom: 30px;">Authorized Access Only</p>
+            <div class="card">
+                <input type="text" id="username" placeholder="Username">
+                <input type="password" id="password" placeholder="Passcode">
+                <button onclick="handleLogin()">AUTHENTICATE</button>
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="view-dashboard" class="view-section">
+            <div class="top-bar">
+                <h1 id="welcomeMessage" style="margin: 0;">Ahlan 👋</h1>
+                <span class="logout-btn" onclick="logout()">Logout</span>
+            </div>
+
+            <div class="card" style="background: #0f172a; color: #fff; border: none; padding-bottom: 15px;">
+                <div class="card-title" style="color: #cbd5e1; display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>Daily Goals</span>
+                    <span id="missionPercent">0%</span>
+                </div>
+                
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="missionProgressBar"></div>
+                </div>
+                
+                <div id="missionQuote" class="quote-text">Victory belongs to the disciplined! 🏆</div>
+                
+                <label class="mission-row" id="rowSteps">
+                    <input type="checkbox" id="missionSteps" onchange="toggleMainMission('steps')">
+                    <span>🚶‍♂️ 7,000 Steps</span>
+                </label>
+                
+                <label class="mission-row" id="rowHang">
+                    <input type="checkbox" id="missionHang" onchange="toggleMainMission('hang')">
+                    <span>🐒 1 Min Dead Hang</span>
+                </label>
+
+                <div class="mission-row" id="rowStretches" onclick="switchView('stretches')" style="margin-bottom: 0;">
+                    <span id="stretchDashText">🧘‍♂️ Mobility Routine (0/5)</span>
+                    <span style="font-size: 16px; color: #cbd5e1;">&rarr;</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="card" style="flex:1; border-left: 4px solid #2563eb; cursor: pointer;" onclick="switchView('weight')">
+                    <div class="card-title">Weight</div>
+                    <div class="card-value" id="dashWeight">-- kg</div>
+                    <p style="font-size: 12px; color: #64748b; margin: 0;">Avg: <span id="dashAvg">--</span></p>
+                </div>
+                <div class="card" style="flex:1; border-left: 4px solid #10b981; cursor: pointer;" onclick="switchView('workout')">
+                    <div class="card-title">Active Phase</div>
+                    <div class="card-value" id="dashSplit" style="font-size: 16px; margin-top: 8px;">No Plan</div>
+                </div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid #334155;">
+                <div class="card-title">Split Library</div>
+                <div class="card-value" style="font-size: 18px;">Program Manager</div>
+                <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 15px;">Build and edit templates.</p>
+                <button style="background: #334155;" onclick="switchView('manager')">Manage Splits &rarr;</button>
+            </div>
+
+            <div class="card" style="border: 1px dashed #cbd5e1;">
+                <div class="card-title">Local Data Backup</div>
+                <div class="row" style="margin-top: 10px;">
+                    <button class="btn-small" style="background:#475569;" onclick="exportData()">Export Data</button>
+                    <label class="btn-small" style="background:#10b981; color:white; padding:8px 12px; border-radius:6px; cursor:pointer; text-align:center; width:100%;">
+                        Import <input type="file" onchange="importData(event)" style="display:none;">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- DEDICATED STRETCH BOARD -->
+        <div id="view-stretches" class="view-section">
+            <div class="top-bar">
+                <button class="back-btn" onclick="switchView('dashboard')">&larr; Dashboard</button>
+                <h2 style="margin: 0; font-size: 16px;">Mobility Routine</h2>
+            </div>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Complete these daily to unlock your full percentage on the dashboard.</p>
+            
+            <div id="stretchContainer">
+                <!-- Media and Details injected by JS -->
+            </div>
+        </div>
+
+        <!-- ACTIVE WORKOUT (EXECUTION) -->
+        <div id="view-workout" class="view-section">
+            <div class="top-bar">
+                <button class="back-btn" onclick="switchView('dashboard')">&larr; Dashboard</button>
+                <h2 style="margin: 0; font-size: 16px;" id="workoutTitle">Active Split</h2>
+            </div>
+            <div id="workoutContent"></div>
+        </div>
+
+        <!-- SPLIT MANAGER -->
+        <div id="view-manager" class="view-section">
+            <div class="top-bar">
+                <button class="back-btn" onclick="switchView('dashboard')">&larr; Dashboard</button>
+                <h2 style="margin: 0; font-size: 16px;">Split Library</h2>
+            </div>
+            <button onclick="createNewSplit()" style="margin-bottom: 15px; background: #0f172a;">+ Create New Split</button>
+            <div id="managerList"></div>
+        </div>
+
+        <!-- SPLIT EDITOR -->
+        <div id="view-editor" class="view-section">
+            <div class="top-bar">
+                <button class="back-btn" onclick="switchView('manager')">&larr; Library</button>
+                <h2 style="margin: 0; font-size: 16px;">Split Editor</h2>
+            </div>
+            <div id="editorContent"></div>
+            <button onclick="switchView('manager')" style="margin-top: 20px; background: #10b981;">Save to Library</button>
+        </div>
+
+        <!-- WEIGHT TRACKER -->
+        <div id="view-weight" class="view-section">
+            <div class="top-bar">
+                <button class="back-btn" onclick="switchView('dashboard')">&larr; Dashboard</button>
+                <h2 style="margin: 0; font-size: 16px;">Weight Log</h2>
+            </div>
+            <div class="card">
+                <div class="row">
+                    <input type="date" id="weightDate" style="margin: 0;">
+                    <div class="input-wrapper" style="width: 100%;">
+                        <input type="number" id="weightValue" placeholder="0.0" step="0.1">
+                        <span class="unit">kg</span>
+                    </div>
+                </div>
+                <button onclick="logWeight()" style="margin-top: 10px;">LOG DAILY WEIGHT</button>
+                
+                <button class="btn-outline" style="color: #ef4444; border-color: #ef4444; margin-top: 15px; width: 100%;" onclick="resetWeightHistory()">⚠ Reset Weight History</button>
+            </div>
+            <div id="weightHistory" style="font-size: 14px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // SYSTEM ADMINISTRATION
+        // ==========================================
+        const AUTHORIZED_USERS = {
+            "abdo": "1234",
+            "aly": "1234",
+            "ahmed": "1234",
+            "raslan": "1234"
+        };
+
+        // ==========================================
+        // LOCAL STRETCH DATABASE 
+        // ==========================================
+        const STRETCH_ROUTINE = [
+            { id: 's1', name: "Bird Dog", desc: "Tighten core, keep back flat. Reach opposite arm and leg.", media: "bird-dog.mp4" },
+            { id: 's2', name: "Dead Bug", desc: "Lower back glued to the floor. Slow and controlled.", media: "dead-bug.mp4" },
+            { id: 's3', name: "Couch Stretch", desc: "Knee against the wall, squeeze glutes. Opens the hips.", media: "couch-stretch.jpg" },
+            { id: 's4', name: "90/90 Stretch", desc: "Chest tall, lean forward over the front leg. Rotate hips.", media: "90-to-90-stretch.jpg" },
+            { id: 's5', name: "Leg over knee glute bridge", desc: "Cross one ankle over opposite knee, drive through planted heel, and squeeze glutes.", media: "leg-over-knee-glute-bridge.jpg" }
+        ];
+
+        // --- CORE STATE ---
+        let todayStr = new Date().toISOString().split('T')[0];
+        
+        let currentUser = JSON.parse(localStorage.getItem('localUser'));
+        let weights = JSON.parse(localStorage.getItem('localWeights')) || {}; 
+        let allSplits = JSON.parse(localStorage.getItem('allSplits')) || [];
+        
+        let defaultMissions = { 
+            date: todayStr, 
+            steps: false, 
+            hang: false, 
+            stretches: { s1: false, s2: false, s3: false, s4: false, s5: false } 
+        };
+        
+        let dailyMissions = JSON.parse(localStorage.getItem('dailyMissions')) || defaultMissions;
+        
+        if (dailyMissions.date !== todayStr || !dailyMissions.stretches) {
+            dailyMissions = defaultMissions;
+            localStorage.setItem('dailyMissions', JSON.stringify(dailyMissions));
+        }
+        
+        let activeSplitIndex = parseInt(localStorage.getItem('activeSplitIndex'));
+        if (isNaN(activeSplitIndex)) activeSplitIndex = -1; 
+        let activeWorkoutDayIndex = 0; 
+        let editingSplitIndex = 0;     
+        let editingDayIndex = 0;
+        let timerInterval;
+
+        document.getElementById('weightDate').max = todayStr;
+        document.getElementById('weightDate').value = todayStr;
+
+        window.onload = () => {
+            if (currentUser) { switchView('dashboard'); } 
+            else { switchView('login'); }
+        };
+
+        function saveData() {
+            localStorage.setItem('localWeights', JSON.stringify(weights));
+            localStorage.setItem('allSplits', JSON.stringify(allSplits));
+            localStorage.setItem('activeSplitIndex', activeSplitIndex);
+            localStorage.setItem('dailyMissions', JSON.stringify(dailyMissions));
+        }
+
+        function exportData() {
+            let backup = { user: localStorage.getItem('localUser'), weights: localStorage.getItem('localWeights'), splits: localStorage.getItem('allSplits'), activeIndex: localStorage.getItem('activeSplitIndex'), missions: localStorage.getItem('dailyMissions') };
+            let blob = new Blob([JSON.stringify(backup)], { type: "application/json" });
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `HealthyBody_Backup_${todayStr}.json`;
+            a.click();
+        }
+
+        function importData(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let data = JSON.parse(e.target.result);
+                    if (data.user) localStorage.setItem('localUser', data.user);
+                    if (data.weights) localStorage.setItem('localWeights', data.weights);
+                    if (data.splits) localStorage.setItem('allSplits', data.splits);
+                    if (data.activeIndex) localStorage.setItem('activeSplitIndex', data.activeIndex);
+                    if (data.missions) localStorage.setItem('dailyMissions', data.missions);
+                    alert("Backup restored! Reloading...");
+                    location.reload();
+                } catch (err) { alert("Invalid backup file."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function handleLogin() {
+            let user = document.getElementById('username').value.trim().toLowerCase();
+            let pass = document.getElementById('password').value;
+            
+            if (AUTHORIZED_USERS[user] && AUTHORIZED_USERS[user] === pass) {
+                let displayName = user.charAt(0).toUpperCase() + user.slice(1);
+                currentUser = { name: displayName };
+                localStorage.setItem('localUser', JSON.stringify(currentUser));
+                switchView('dashboard');
+            } else {
+                alert("Access Denied. Invalid credentials.");
+            }
+        }
+
+        function logout() { localStorage.removeItem('localUser'); location.reload(); }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('view-active'));
+            document.getElementById(`view-${viewName}`).classList.add('view-active');
+            
+            if (viewName === 'dashboard') updateDashboard();
+            if (viewName === 'workout') renderActiveWorkout();
+            if (viewName === 'manager') renderSplitManager();
+            if (viewName === 'editor') renderSplitEditor();
+            if (viewName === 'weight') updateWeightUI();
+            if (viewName === 'stretches') renderStretchBoard();
+        }
+
+        // --- DASHBOARD & DYNAMIC PROGRESS MATH ---
+        function updateDashboard() {
+            document.getElementById('welcomeMessage').innerText = `Ahlan, ${currentUser.name} 👋`;
+            
+            let dates = Object.keys(weights).sort().reverse();
+            if (dates.length > 0) {
+                document.getElementById('dashWeight').innerText = weights[dates[0]] + " kg";
+                let sum = 0, count = Math.min(dates.length, 7);
+                for(let i=0; i<count; i++) sum += weights[dates[i]];
+                document.getElementById('dashAvg').innerText = (sum/count).toFixed(2) + " kg";
+            } else {
+                document.getElementById('dashWeight').innerText = "-- kg";
+                document.getElementById('dashAvg').innerText = "-- kg";
+            }
+            
+            document.getElementById('dashSplit').innerText = (activeSplitIndex >= 0 && allSplits[activeSplitIndex]) ? allSplits[activeSplitIndex].name : "No Plan";
+            
+            renderMissions();
+        }
+
+        function toggleMainMission(mission) {
+            dailyMissions[mission] = document.getElementById(`mission${mission.charAt(0).toUpperCase() + mission.slice(1)}`).checked;
+            saveData();
+            renderMissions();
+        }
+
+        function renderMissions() {
+            document.getElementById('missionSteps').checked = dailyMissions.steps;
+            document.getElementById('rowSteps').style.background = dailyMissions.steps ? '#10b981' : '#1e293b';
+            
+            document.getElementById('missionHang').checked = dailyMissions.hang;
+            document.getElementById('rowHang').style.background = dailyMissions.hang ? '#10b981' : '#1e293b';
+            
+            let stretchesDone = 0;
+            STRETCH_ROUTINE.forEach(stretch => {
+                if(dailyMissions.stretches[stretch.id]) stretchesDone++;
+            });
+            
+            document.getElementById('stretchDashText').innerText = `🧘‍♂️ Mobility Routine (${stretchesDone}/${STRETCH_ROUTINE.length})`;
+            document.getElementById('rowStretches').style.background = (stretchesDone === STRETCH_ROUTINE.length) ? '#10b981' : '#1e293b';
+
+            let progress = 0;
+            if (dailyMissions.steps) progress += 33.33;
+            if (dailyMissions.hang) progress += 33.33;
+            
+            let stretchValueEach = 33.34 / STRETCH_ROUTINE.length;
+            progress += (stretchesDone * stretchValueEach);
+            
+            let roundedProgress = Math.round(progress);
+            if(roundedProgress > 100) roundedProgress = 100;
+            
+            document.getElementById('missionPercent').innerText = `${roundedProgress}%`;
+            document.getElementById('missionProgressBar').style.width = `${roundedProgress}%`;
+
+            let quoteEl = document.getElementById('missionQuote');
+            if (roundedProgress === 100) {
+                quoteEl.style.display = 'block';
+                quoteEl.innerText = "All daily goals complete. Excellent work. 🏆";
+            } else {
+                quoteEl.style.display = 'none';
+            }
+        }
+
+        // --- THE DEDICATED STRETCH BOARD ---
+        function renderStretchBoard() {
+            let container = document.getElementById('stretchContainer');
+
+            let html = STRETCH_ROUTINE.map(stretch => {
+                let isChecked = dailyMissions.stretches[stretch.id];
+                
+                let isVideo = stretch.media.endsWith('.mp4');
+                let fallback = "onerror=\"this.onerror=null; this.src='https://placehold.co/100x100/e2e8f0/0f172a?text=Media+Missing';\"";
+                
+                let mediaElement = isVideo 
+                    ? `<video src="${stretch.media}" class="stretch-img" autoplay loop muted playsinline></video>`
+                    : `<img src="${stretch.media}" class="stretch-img" alt="${stretch.name}" ${fallback}>`;
+
+                return `
+                <div class="stretch-card" onclick="toggleBoardStretch('${stretch.id}')" style="${isChecked ? 'opacity: 0.6;' : ''}">
+                    ${mediaElement}
+                    <div class="stretch-info">
+                        <h3>${stretch.name}</h3>
+                        <p>${stretch.desc}</p>
+                    </div>
+                    <input type="checkbox" class="stretch-check" id="check_${stretch.id}" ${isChecked ? 'checked' : ''} onclick="event.stopPropagation(); toggleBoardStretch('${stretch.id}')">
+                </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+
+        function toggleBoardStretch(stretchId) {
+            dailyMissions.stretches[stretchId] = !dailyMissions.stretches[stretchId];
+            saveData();
+            renderStretchBoard();
+            renderMissions();
+        }
+
+        // --- WEIGHT LOGIC & RESET ---
+        function logWeight() {
+            let d = document.getElementById('weightDate').value, w = parseFloat(document.getElementById('weightValue').value);
+            if (!d || !w || d > todayStr) return; weights[d] = w; saveData(); document.getElementById('weightValue').value = ""; updateWeightUI();
+        }
+        function resetWeightHistory() {
+            let newWeight = prompt("Enter your current weight (kg) to start fresh:");
+            if (newWeight !== null && newWeight !== "") {
+                let parsedWeight = parseFloat(newWeight);
+                if (!isNaN(parsedWeight)) {
+                    if(confirm("This permanently deletes all past weight entries. Proceed?")) {
+                        weights = {}; weights[todayStr] = parsedWeight; saveData(); updateWeightUI();
+                    }
+                } else { alert("Invalid number."); }
+            }
+        }
+        function updateWeightUI() { document.getElementById('weightHistory').innerHTML = Object.keys(weights).sort().reverse().map(d => `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #e2e8f0;"><span>${d}</span><strong>${weights[d]} kg</strong></div>`).join(''); }
+
+        // --- ACTIVE WORKOUT (GHOST SETS & TIMER) ---
+        function startTimer() {
+            let timerEl = document.getElementById('restTimer'); timerEl.style.display = 'block'; let time = 90; clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                let m = Math.floor(time / 60); let s = time % 60; timerEl.innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+                if (time <= 0) { clearInterval(timerInterval); timerEl.style.background = '#ef4444'; timerEl.style.color = '#fff'; timerEl.innerText = "GO!"; setTimeout(() => timerEl.style.display = 'none', 3000); }
+                time--;
+            }, 1000);
+        }
+        function stopTimer() { clearInterval(timerInterval); document.getElementById('restTimer').style.display = 'none'; }
+        function saveSet(exIndex, setIndex) {
+            let w = document.getElementById(`w_${exIndex}_${setIndex}`).value; let r = document.getElementById(`r_${exIndex}_${setIndex}`).value;
+            allSplits[activeSplitIndex].days[activeWorkoutDayIndex].exercises[exIndex].sets[setIndex].w = w; allSplits[activeSplitIndex].days[activeWorkoutDayIndex].exercises[exIndex].sets[setIndex].r = r;
+            saveData();
+            let btn = document.getElementById(`btn_${exIndex}_${setIndex}`); btn.innerText = "✓"; btn.style.background = "#10b981";
+            setTimeout(() => { btn.innerText = "SAVE"; btn.style.background = "#2563eb"; }, 1000);
+            renderActiveWorkout(); 
+            let timerEl = document.getElementById('restTimer'); timerEl.style.background = '#0f172a'; timerEl.style.color = '#10b981'; startTimer();
+        }
+        function finishWorkout() {
+            if(confirm("Finish session? This logs volume and sets today's numbers as Ghost Sets for next week.")) {
+                allSplits[activeSplitIndex].days[activeWorkoutDayIndex].exercises.forEach(ex => { ex.sets.forEach(set => { if (set.w || set.r) { set.prevW = set.w; set.prevR = set.r; set.w = ""; set.r = ""; }});});
+                saveData(); renderActiveWorkout();
+            }
+        }
+        function renderActiveWorkout() {
+            let container = document.getElementById('workoutContent');
+            if (activeSplitIndex < 0 || !allSplits[activeSplitIndex]) {
+                document.getElementById('workoutTitle').innerText = "No Plan Selected"; container.innerHTML = `<button onclick="switchView('manager')">Go to Split Library</button>`; return;
+            }
+            let split = allSplits[activeSplitIndex]; document.getElementById('workoutTitle').innerText = split.name;
+            let tabsHTML = split.days.map((day, idx) => `<div class="tab ${idx === activeWorkoutDayIndex ? 'active' : ''}" onclick="activeWorkoutDayIndex=${idx}; renderActiveWorkout()">${day.name}</div>`).join('');
+            let totalVolume = 0;
+            let exercisesHTML = split.days[activeWorkoutDayIndex].exercises.map((ex, exIndex) => {
+                let setsHTML = ex.sets.map((set, setIndex) => {
+                    if (set.w && set.r) totalVolume += (parseFloat(set.w) * parseInt(set.r));
+                    return `<div class="set-row"><span style="font-size:12px; color:#64748b; font-weight:bold;">SET ${setIndex + 1}</span><div class="row"><div class="input-wrapper"><input type="number" id="w_${exIndex}_${setIndex}" placeholder="${set.prevW || '-'}" value="${set.w || ''}"><span class="unit">kg</span></div><div class="input-wrapper"><input type="number" id="r_${exIndex}_${setIndex}" placeholder="${set.prevR || '-'}" value="${set.r || ''}"><span class="unit">reps</span></div><button class="btn-small" id="btn_${exIndex}_${setIndex}" onclick="saveSet(${exIndex}, ${setIndex})">SAVE</button></div></div>`;
+                }).join('');
+                return `<div class="card"><h3 style="margin: 0 0 12px 0; font-size:16px;">${ex.name}</h3>${setsHTML}</div>`;
+            }).join('');
+            container.innerHTML = `<div class="tabs">${tabsHTML}</div><div class="card" style="background:#0f172a; color:#fff; border:none; text-align:center;"><span style="font-size:12px; color:#cbd5e1;">TODAY'S VOLUME</span><div style="font-size:24px; font-weight:bold; color:#10b981;">${totalVolume.toLocaleString()} kg</div></div>${exercisesHTML}<button onclick="finishWorkout()" style="background:#10b981; margin-top:20px;">Finish & Lock Ghost Sets</button>`;
+        }
+
+        // --- SPLIT MANAGER & EDITOR ---
+        function renderSplitManager() {
+            let list = document.getElementById('managerList');
+            if (allSplits.length === 0) return list.innerHTML = `<p>Library empty.</p>`;
+            list.innerHTML = allSplits.map((split, index) => {
+                let isActive = (index === activeSplitIndex);
+                return `<div class="split-item ${isActive ? 'active-split' : ''}"><div><strong style="display:block;">${split.name}</strong><span style="font-size:12px; color:#64748b;">${split.days.length} Days</span></div><div style="display:flex; gap:6px;">${!isActive ? `<button class="btn-small" style="background:#10b981;" onclick="setActiveSplit(${index})">Activate</button>` : `<span style="font-size:12px; font-weight:bold; color:#10b981; padding:6px;">ACTIVE</span>`}<button class="btn-small" style="background:#334155;" onclick="openEditor(${index})">Edit</button><button class="btn-small" style="background:#ef4444;" onclick="deleteSplit(${index})">Del</button></div></div>`;
+            }).join('');
+        }
+        function createNewSplit() {
+            let name = prompt("Split Name:"); if (!name) return; let days = parseInt(prompt("How many days?")); if (!days) return;
+            let newSplit = { name: name, days: [] }; for(let i=0; i<days; i++) newSplit.days.push({ name: prompt(`Name Day ${i+1}:`) || `Day ${i+1}`, exercises: [] });
+            allSplits.push(newSplit); saveData(); openEditor(allSplits.length - 1);
+        }
+        function setActiveSplit(index) { activeSplitIndex = index; activeWorkoutDayIndex = 0; saveData(); renderSplitManager(); }
+        function deleteSplit(index) { if(confirm("Delete?")) { allSplits.splice(index, 1); if (activeSplitIndex === index) activeSplitIndex = -1; else if (activeSplitIndex > index) activeSplitIndex--; saveData(); renderSplitManager(); } }
+        
+        function openEditor(index) { editingSplitIndex = index; editingDayIndex = 0; switchView('editor'); }
+        function addExerciseToEditor() {
+            let name = document.getElementById('editExName').value.trim(); if (!name) return;
+            allSplits[editingSplitIndex].days[editingDayIndex].exercises.push({ name: name, sets: [{w:"", r:"", prevW:"", prevR:""},{w:"", r:"", prevW:"", prevR:""},{w:"", r:"", prevW:"", prevR:""}] });
+            saveData(); renderSplitEditor();
+        }
+        function removeExerciseFromEditor(exIndex) { allSplits[editingSplitIndex].days[editingDayIndex].exercises.splice(exIndex, 1); saveData(); renderSplitEditor(); }
+        function adjustEditorSets(exIndex, change) {
+            let s = allSplits[editingSplitIndex].days[editingDayIndex].exercises[exIndex].sets;
+            if(change===1) s.push({w:"", r:"", prevW:"", prevR:""}); else if(change===-1 && s.length>1) s.pop();
+            saveData(); renderSplitEditor();
+        }
+        function renderSplitEditor() {
+            let split = allSplits[editingSplitIndex];
+            let tabsHTML = split.days.map((day, idx) => `<div class="tab ${idx === editingDayIndex ? 'active' : ''}" onclick="editingDayIndex=${idx}; renderSplitEditor()">${day.name}</div>`).join('');
+            let exercisesHTML = split.days[editingDayIndex].exercises.map((ex, exIndex) => `<div class="card"><div class="ex-header"><h3 style="margin:0;">${ex.name}</h3><div class="ex-actions"><button class="ex-btn" onclick="adjustEditorSets(${exIndex}, 1)">+ Set</button><button class="ex-btn" onclick="adjustEditorSets(${exIndex}, -1)">- Set</button><button class="ex-btn del" onclick="removeExerciseFromEditor(${exIndex})">X</button></div></div><p style="font-size:12px; margin:0;">${ex.sets.length} Sets</p></div>`).join('');
+            document.getElementById('editorContent').innerHTML = `<div class="tabs">${tabsHTML}</div><div class="card"><input type="text" id="editExName" placeholder="New Exercise"><button onclick="addExerciseToEditor()">Add</button></div>${exercisesHTML}`;
+        }
+    </script>
+</body>
+</html>
