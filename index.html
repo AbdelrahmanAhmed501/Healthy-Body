@@ -438,19 +438,43 @@
         }
         function saveSet(ex, set) { allSplits[activeSplitIndex].days[activeWorkoutDayIndex].exercises[ex].sets[set].w = document.getElementById(`w_${ex}_${set}`).value; allSplits[activeSplitIndex].days[activeWorkoutDayIndex].exercises[ex].sets[set].r = document.getElementById(`r_${ex}_${set}`).value; saveData(); }
 
-        // --- SPLIT EDITOR & LIBRARY ---
+// --- SPLIT EDITOR & LIBRARY ---
         function renderSplitManager() {
-            document.getElementById('managerList').innerHTML = allSplits.map((s, i) => `<div class="split-item ${i === activeSplitIndex ? 'active-split' : ''}"><div><strong>${s.name}</strong></div><div style="display:flex; gap:6px;"><button class="btn-small" style="background:#10b981;" onclick="activeSplitIndex=${i}; saveData(); renderSplitManager();">Act</button><button class="btn-small" style="background:#334155;" onclick="editingSplitIndex=${i}; editingDayIndex=0; switchView('editor');">Edit</button></div></div>`).join('');
+            document.getElementById('managerList').innerHTML = allSplits.map((s, i) => `<div class="split-item ${i === activeSplitIndex ? 'active-split' : ''}"><div><strong>${s.name}</strong><span style="display:block; font-size:12px; color:#64748b;">${s.days.length} Days</span></div><div style="display:flex; gap:6px;"><button class="btn-small" style="background:#10b981;" onclick="activeSplitIndex=${i}; saveData(); renderSplitManager();">Act</button><button class="btn-small" style="background:#334155;" onclick="editingSplitIndex=${i}; editingDayIndex=0; switchView('editor');">Edit</button></div></div>`).join('');
         }
-        function createNewSplit() { let name = prompt("Name:"); if(!name) return; allSplits.push({name: name, days:[{name:"Day 1", exercises:[]}]}); saveData(); renderSplitManager(); }
         
+        function createNewSplit() { 
+            let name = prompt("Split Name:"); if(!name) return; 
+            let days = parseInt(prompt("How many days?")); if(!days) return;
+            let newSplit = { name: name, days: [] }; 
+            for(let i=0; i<days; i++) newSplit.days.push({ name: prompt(`Name Day ${i+1}:`) || `Day ${i+1}`, exercises: [] });
+            allSplits.push(newSplit); saveData(); 
+            editingSplitIndex = allSplits.length - 1; editingDayIndex = 0; switchView('editor'); 
+        }
+        
+        function adjustEditorSets(exIndex, change) {
+            let s = allSplits[editingSplitIndex].days[editingDayIndex].exercises[exIndex].sets;
+            if(change === 1) s.push({w:"", r:""}); else if(change === -1 && s.length > 1) s.pop();
+            saveData(); renderSplitEditor();
+        }
+
         function renderSplitEditor() {
             let split = allSplits[editingSplitIndex];
             let tabs = split.days.map((day, idx) => `<div class="tab ${idx === editingDayIndex ? 'active' : ''}" onclick="editingDayIndex=${idx}; renderSplitEditor()">${day.name}</div>`).join('');
             
             let exHTML = split.days[editingDayIndex].exercises.map((ex, exIndex) => {
                 let imgHTML = ex.img ? `<img src="${ex.img}" style="width:35px; height:35px; border-radius:4px; object-fit:cover; margin-right:10px;" onerror="this.src='https://placehold.co/35/e2e8f0/0f172a?text=Ex'">` : '';
-                return `<div class="card"><div class="ex-header"><div style="display:flex; align-items:center;">${imgHTML}<h3 style="margin:0; font-size:15px;">${ex.name}</h3></div><div class="ex-actions"><button class="ex-btn del" onclick="allSplits[editingSplitIndex].days[editingDayIndex].exercises.splice(${exIndex}, 1); saveData(); renderSplitEditor();">X</button></div></div></div>`;
+                return `<div class="card">
+                    <div class="ex-header">
+                        <div style="display:flex; align-items:center;">${imgHTML}<h3 style="margin:0; font-size:15px;">${ex.name}</h3></div>
+                        <div class="ex-actions">
+                            <button class="ex-btn" onclick="adjustEditorSets(${exIndex}, 1)">+ Set</button>
+                            <button class="ex-btn" onclick="adjustEditorSets(${exIndex}, -1)">- Set</button>
+                            <button class="ex-btn del" onclick="allSplits[editingSplitIndex].days[editingDayIndex].exercises.splice(${exIndex}, 1); saveData(); renderSplitEditor();">X</button>
+                        </div>
+                    </div>
+                    <p style="font-size:12px; margin:0; color:#64748b;">${ex.sets.length} Sets</p>
+                </div>`;
             }).join('');
             document.getElementById('editorContent').innerHTML = `<div class="tabs">${tabs}</div><button onclick="openLibrary()" style="margin-bottom:15px; background:#0f172a;">+ Browse Exercise Library</button>${exHTML}`;
         }
