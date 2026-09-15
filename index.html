@@ -44,23 +44,26 @@
         .ex-btn { background: #e2e8f0; color: #475569; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .ex-btn.del { color: #ef4444; background: #fee2e2; }
         
-        /* Mission Tracker Styles */
         .mission-row { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 8px; cursor: pointer; transition: background 0.3s; background: #1e293b; margin-bottom: 8px; user-select: none; }
         .mission-row input[type="checkbox"] { width: 22px; height: 22px; margin: 0; cursor: pointer; accent-color: #10b981; }
-        .mission-row span { font-weight: bold; font-size: 15px; color: #fff; flex-grow: 1; }
+        .mission-row span { font-weight: bold; font-size: 15px; color: #fff; flex-grow: 1; display:flex; justify-content:space-between; align-items:center; }
         .progress-bar-bg { background: #334155; border-radius: 10px; height: 8px; width: 100%; margin-bottom: 15px; overflow: hidden; }
         .progress-bar-fill { background: #10b981; height: 100%; width: 0%; transition: width 0.4s ease-out; }
         .quote-text { font-size: 13px; color: #10b981; font-weight: bold; text-align: center; margin-bottom: 12px; display: none; }
         
-        /* Dedicated Stretch Board Styles */
         .stretch-card { display: flex; gap: 15px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 12px; align-items: center; cursor: pointer; transition: background 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .stretch-card:active { background: #f8fafc; }
-        /* Notice object-fit is now 'contain' and size is larger */
         .stretch-img { width: 90px; height: 90px; border-radius: 8px; object-fit: contain; background: #ffffff; flex-shrink: 0; padding: 2px; }
         .stretch-info { flex-grow: 1; }
         .stretch-info h3 { margin: 0 0 4px 0; font-size: 16px; color: #0f172a; }
-        .stretch-info p { margin: 0; font-size: 12px; color: #64748b; line-height: 1.4; }
-        .stretch-check { width: 24px; height: 24px; accent-color: #10b981; cursor: pointer; }
+        
+        /* Library UI */
+        .lib-group { margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
+        .lib-group-title { background: #0f172a; color: #fff; padding: 10px 15px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; }
+        .lib-subgroup { background: #f8fafc; border-bottom: 1px solid #cbd5e1; }
+        .lib-subgroup-title { padding: 8px 15px; font-size: 14px; font-weight: bold; color: #475569; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; }
+        .lib-exercise { display: flex; align-items: center; gap: 12px; padding: 10px 15px; background: #fff; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s; }
+        .lib-exercise:hover { background: #f1f5f9; }
+        .lib-thumb { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; background: #e2e8f0; }
 
         #restTimer { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #10b981; padding: 10px 20px; border-radius: 30px; font-weight: bold; font-size: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: none; z-index: 100; cursor: pointer; }
 
@@ -105,7 +108,10 @@
                 
                 <label class="mission-row" id="rowSteps">
                     <input type="checkbox" id="missionSteps" onchange="toggleMainMission('steps')">
-                    <span>🚶‍♂️ 7,000 Steps</span>
+                    <span>
+                        <span id="stepGoalText">🚶‍♂️ 7,000 Steps</span>
+                        <span style="font-size:12px; color:#94a3b8; cursor:pointer; padding:5px;" onclick="event.preventDefault(); editStepGoal();">✏️ Edit</span>
+                    </span>
                 </label>
                 
                 <label class="mission-row" id="rowHang">
@@ -137,7 +143,7 @@
                 <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 15px;">Build and edit templates.</p>
                 <button style="background: #334155;" onclick="switchView('manager')">Manage Splits &rarr;</button>
             </div>
-
+            
             <div class="card" style="border: 1px dashed #cbd5e1;">
                 <div class="card-title">Local Data Backup</div>
                 <div class="row" style="margin-top: 10px;">
@@ -155,14 +161,10 @@
                 <button class="back-btn" onclick="switchView('dashboard')">&larr; Dashboard</button>
                 <h2 style="margin: 0; font-size: 16px;">Mobility Routine</h2>
             </div>
-            <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Complete these daily to unlock your full percentage on the dashboard.</p>
-            
-            <div id="stretchContainer">
-                <!-- Media and Details injected by JS -->
-            </div>
+            <div id="stretchContainer"></div>
         </div>
 
-        <!-- ACTIVE WORKOUT (EXECUTION) -->
+        <!-- ACTIVE WORKOUT -->
         <div id="view-workout" class="view-section">
             <div class="top-bar">
                 <button class="back-btn" onclick="switchView('dashboard')">&larr; Dashboard</button>
@@ -206,328 +208,274 @@
                     </div>
                 </div>
                 <button onclick="logWeight()" style="margin-top: 10px;">LOG DAILY WEIGHT</button>
-                
-                <button class="btn-outline" style="color: #ef4444; border-color: #ef4444; margin-top: 15px; width: 100%;" onclick="resetWeightHistory()">⚠ Reset Weight History</button>
             </div>
             <div id="weightHistory" style="font-size: 14px;"></div>
         </div>
     </div>
 
+    <!-- EXERCISE LIBRARY MODAL -->
+    <div id="exerciseLibraryModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:200; overflow-y:auto; padding:20px; box-sizing:border-box;">
+        <div style="background:#fff; border-radius:12px; max-width:400px; margin:0 auto; padding-bottom: 20px; overflow:hidden;">
+            <div style="background:#0f172a; padding:15px; display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; color:#fff; font-size:16px;">Exercise Database</h2>
+                <button style="width:auto; padding:6px 12px; background:#ef4444; border-radius:6px; font-size:12px;" onclick="closeLibrary()">Close</button>
+            </div>
+            <div id="libraryContent" style="padding:15px;"></div>
+        </div>
+    </div>
+
     <script>
-        // ==========================================
-        // SYSTEM ADMINISTRATION
-        // ==========================================
-        const AUTHORIZED_USERS = {
-            "abdo": "1234",
-            "aly": "1234",
-            "ahmed": "1234",
-            "raslan": "1234"
+        // --- CENTRAL DATABASE ---
+      // --- CENTRAL MEGA DATABASE ---
+        const EXERCISE_DB = {
+            "Chest": {
+                "Upper Chest (Clavicular)": [
+                    { name: "Incline DB Press", img: "inc-db.jpg" },
+                    { name: "Incline Barbell Press", img: "inc-bar.jpg" },
+                    { name: "Incline Smith Press", img: "inc-smith.jpg" },
+                    { name: "Incline Machine Press", img: "inc-mach.jpg" },
+                    { name: "Low-to-High Cable Fly", img: "low-cable-fly.jpg" }
+                ],
+                "Mid/Overall Chest": [
+                    { name: "Flat Barbell Bench", img: "flat-bench.jpg" },
+                    { name: "Flat DB Press", img: "flat-db.jpg" },
+                    { name: "Flat Machine Press", img: "flat-mach.jpg" },
+                    { name: "Pec Deck Fly", img: "pec-deck.jpg" },
+                    { name: "Push-ups", img: "pushup.jpg" }
+                ],
+                "Lower Chest": [
+                    { name: "High-to-Low Cable Fly", img: "high-cable-fly.jpg" },
+                    { name: "Dips", img: "dips.jpg" },
+                    { name: "Decline DB Press", img: "dec-db.jpg" }
+                ]
+            },
+            "Back": {
+                "Lats (Width)": [
+                    { name: "Lat Pulldown (Wide)", img: "lat-pull-wide.jpg" },
+                    { name: "Lat Pulldown (Neutral/Close)", img: "lat-pull-close.jpg" },
+                    { name: "Pull-ups", img: "pullup.jpg" },
+                    { name: "Straight Arm Pulldown", img: "straight-arm.jpg" },
+                    { name: "Single-Arm Machine Pull", img: "iso-pull.jpg" }
+                ],
+                "Upper/Mid Back (Thickness)": [
+                    { name: "Barbell Row", img: "bar-row.jpg" },
+                    { name: "Dumbbell Row", img: "db-row.jpg" },
+                    { name: "Chest-Supported Row", img: "chest-row.jpg" },
+                    { name: "Seated Cable Row", img: "cable-row.jpg" },
+                    { name: "T-Bar Row", img: "tbar-row.jpg" }
+                ],
+                "Lower Back": [
+                    { name: "Deadlift", img: "deadlift.jpg" },
+                    { name: "Back Extension", img: "back-ext.jpg" }
+                ]
+            },
+            "Shoulders": {
+                "Side Delts (Width)": [
+                    { name: "DB Lateral Raise", img: "db-lat.jpg" },
+                    { name: "Cable Lateral Raise", img: "cab-lat.jpg" },
+                    { name: "Machine Lateral Raise", img: "mach-lat.jpg" }
+                ],
+                "Front Delts (Pressing)": [
+                    { name: "Overhead Barbell Press", img: "ohp.jpg" },
+                    { name: "Seated DB Shoulder Press", img: "db-press.jpg" },
+                    { name: "Machine Shoulder Press", img: "mach-press.jpg" },
+                    { name: "Front Raises", img: "front-raise.jpg" }
+                ],
+                "Rear Delts & Traps": [
+                    { name: "Face Pulls", img: "face-pull.jpg" },
+                    { name: "Reverse Pec Deck", img: "rev-pec.jpg" },
+                    { name: "Rear Delt DB Fly", img: "rear-delt-db.jpg" },
+                    { name: "DB Shrugs", img: "db-shrug.jpg" }
+                ]
+            },
+            "Arms": {
+                "Biceps": [
+                    { name: "Barbell Curl", img: "bar-curl.jpg" },
+                    { name: "Alternating DB Curl", img: "db-curl.jpg" },
+                    { name: "EZ Bar Preacher Curl", img: "preacher.jpg" },
+                    { name: "Cable Curl", img: "cable-curl.jpg" },
+                    { name: "DB Hammer Curl", img: "hammer.jpg" }
+                ],
+                "Triceps": [
+                    { name: "Rope Pushdown", img: "rope-push.jpg" },
+                    { name: "V-Bar Pushdown", img: "vbar-push.jpg" },
+                    { name: "Overhead Cable Extension", img: "cable-ext.jpg" },
+                    { name: "Skullcrushers (EZ Bar)", img: "skullcrusher.jpg" },
+                    { name: "Close-Grip Bench Press", img: "close-grip.jpg" }
+                ]
+            },
+            "Legs": {
+                "Quads": [
+                    { name: "Barbell Back Squat", img: "back-squat.jpg" },
+                    { name: "Leg Press", img: "leg-press.jpg" },
+                    { name: "Hack Squat", img: "hack-squat.jpg" },
+                    { name: "Leg Extension", img: "leg-ext.jpg" },
+                    { name: "Bulgarian Split Squat", img: "bulgarian.jpg" }
+                ],
+                "Hamstrings & Glutes": [
+                    { name: "Romanian Deadlift (RDL)", img: "rdl.jpg" },
+                    { name: "Lying Leg Curl", img: "lying-curl.jpg" },
+                    { name: "Seated Leg Curl", img: "seated-curl.jpg" },
+                    { name: "Barbell Hip Thrust", img: "hip-thrust.jpg" },
+                    { name: "Glute Bridge", img: "bridge.jpg" }
+                ],
+                "Calves": [
+                    { name: "Standing Calf Raise", img: "stand-calf.jpg" },
+                    { name: "Seated Calf Raise", img: "seated-calf.jpg" }
+                ]
+            },
+            "Core": {
+                "Abdominals & Stability": [
+                    { name: "Cable Crunches", img: "cable-crunch.jpg" },
+                    { name: "Hanging Leg/Knee Raise", img: "leg-raise.jpg" },
+                    { name: "Machine Crunch", img: "mach-crunch.jpg" },
+                    { name: "Russian Twists", img: "russian-twist.jpg" },
+                    { name: "Weighted Plank", img: "plank.jpg" },
+                    { name: "Dead Bugs", img: "dead-bug.jpg" }
+                ]
+            }
         };
 
-        // ==========================================
-        // LOCAL STRETCH DATABASE 
-        // ==========================================
         const STRETCH_ROUTINE = [
-            { id: 's1', name: "Bird Dog", desc: "Tighten core, keep back flat. Reach opposite arm and leg.", media: "bird-dog.mp4" },
-            { id: 's2', name: "Dead Bug", desc: "Lower back glued to the floor. Slow and controlled.", media: "dead-bug.mp4" },
-            { id: 's3', name: "Couch Stretch", desc: "Knee against the wall, squeeze glutes. Opens the hips.", media: "couch-stretch.jpg" },
-            { id: 's4', name: "90/90 Stretch", desc: "Chest tall, lean forward over the front leg. Rotate hips.", media: "90-to-90-stretch.jpg" },
-            { id: 's5', name: "Leg over knee glute bridge", desc: "Cross one ankle over opposite knee, drive through planted heel, and squeeze glutes.", media: "leg-over-knee-glute-bridge.jpg" }
+            { id: 's1', name: "Bird Dog", desc: "Tighten core, keep back flat.", media: "bird-dog.mp4" },
+            { id: 's2', name: "Dead Bug", desc: "Lower back glued to floor.", media: "dead-bug.mp4" },
+            { id: 's3', name: "Couch Stretch", desc: "Opens the hips.", media: "couch-stretch.jpg" },
+            { id: 's4', name: "90/90 Stretch", desc: "Chest tall, lean forward.", media: "90-90-stretch.mp4" },
+            { id: 's5', name: "Leg over knee glute bridge", desc: "Drive through planted heel.", media: "leg-over-knee-glute-bridge.jpg" }
         ];
 
-        // --- CORE STATE ---
         let todayStr = new Date().toISOString().split('T')[0];
-        
         let currentUser = JSON.parse(localStorage.getItem('localUser'));
         let weights = JSON.parse(localStorage.getItem('localWeights')) || {}; 
         let allSplits = JSON.parse(localStorage.getItem('allSplits')) || [];
         
-        let defaultMissions = { 
-            date: todayStr, 
-            steps: false, 
-            hang: false, 
-            stretches: { s1: false, s2: false, s3: false, s4: false, s5: false } 
-        };
-        
+        let defaultMissions = { date: todayStr, steps: false, hang: false, stretches: { s1:false, s2:false, s3:false, s4:false, s5:false } };
         let dailyMissions = JSON.parse(localStorage.getItem('dailyMissions')) || defaultMissions;
+        if (dailyMissions.date !== todayStr || !dailyMissions.stretches) { dailyMissions = defaultMissions; localStorage.setItem('dailyMissions', JSON.stringify(dailyMissions)); }
         
-        if (dailyMissions.date !== todayStr || !dailyMissions.stretches) {
-            dailyMissions = defaultMissions;
-            localStorage.setItem('dailyMissions', JSON.stringify(dailyMissions));
-        }
-        
-        let activeSplitIndex = parseInt(localStorage.getItem('activeSplitIndex'));
-        if (isNaN(activeSplitIndex)) activeSplitIndex = -1; 
-        let activeWorkoutDayIndex = 0; 
-        let editingSplitIndex = 0;     
-        let editingDayIndex = 0;
-        let timerInterval;
+        let activeSplitIndex = parseInt(localStorage.getItem('activeSplitIndex')); if (isNaN(activeSplitIndex)) activeSplitIndex = -1; 
+        let activeWorkoutDayIndex = 0; let editingSplitIndex = 0; let editingDayIndex = 0; let timerInterval;
 
-        document.getElementById('weightDate').max = todayStr;
-        document.getElementById('weightDate').value = todayStr;
+        document.getElementById('weightDate').max = todayStr; document.getElementById('weightDate').value = todayStr;
 
-        window.onload = () => {
-            if (currentUser) { switchView('dashboard'); } 
-            else { switchView('login'); }
-        };
+        window.onload = () => { if (currentUser) { switchView('dashboard'); } else { switchView('login'); } };
 
-        function saveData() {
-            localStorage.setItem('localWeights', JSON.stringify(weights));
-            localStorage.setItem('allSplits', JSON.stringify(allSplits));
-            localStorage.setItem('activeSplitIndex', activeSplitIndex);
-            localStorage.setItem('dailyMissions', JSON.stringify(dailyMissions));
-        }
-
-        function exportData() {
-            let backup = { user: localStorage.getItem('localUser'), weights: localStorage.getItem('localWeights'), splits: localStorage.getItem('allSplits'), activeIndex: localStorage.getItem('activeSplitIndex'), missions: localStorage.getItem('dailyMissions') };
-            let blob = new Blob([JSON.stringify(backup)], { type: "application/json" });
-            let a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `HealthyBody_Backup_${todayStr}.json`;
-            a.click();
-        }
-
-        function importData(event) {
-            let file = event.target.files[0];
-            if (!file) return;
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    let data = JSON.parse(e.target.result);
-                    if (data.user) localStorage.setItem('localUser', data.user);
-                    if (data.weights) localStorage.setItem('localWeights', data.weights);
-                    if (data.splits) localStorage.setItem('allSplits', data.splits);
-                    if (data.activeIndex) localStorage.setItem('activeSplitIndex', data.activeIndex);
-                    if (data.missions) localStorage.setItem('dailyMissions', data.missions);
-                    alert("Backup restored! Reloading...");
-                    location.reload();
-                } catch (err) { alert("Invalid backup file."); }
-            };
-            reader.readAsText(file);
-        }
+        function saveData() { localStorage.setItem('localWeights', JSON.stringify(weights)); localStorage.setItem('allSplits', JSON.stringify(allSplits)); localStorage.setItem('activeSplitIndex', activeSplitIndex); localStorage.setItem('dailyMissions', JSON.stringify(dailyMissions)); }
 
         function handleLogin() {
             let user = document.getElementById('username').value.trim().toLowerCase();
             let pass = document.getElementById('password').value;
-            
-            if (AUTHORIZED_USERS[user] && AUTHORIZED_USERS[user] === pass) {
-                let displayName = user.charAt(0).toUpperCase() + user.slice(1);
-                currentUser = { name: displayName };
-                localStorage.setItem('localUser', JSON.stringify(currentUser));
-                switchView('dashboard');
-            } else {
-                alert("Access Denied. Invalid credentials.");
-            }
+            if ({"abdo":"1234", "aly":"1234", "ahmed":"1234", "raslan":"1234"}[user] && pass === "1234") {
+                currentUser = { name: user.charAt(0).toUpperCase() + user.slice(1), stepGoal: 7000 };
+                localStorage.setItem('localUser', JSON.stringify(currentUser)); switchView('dashboard');
+            } else { alert("Access Denied."); }
         }
-
         function logout() { localStorage.removeItem('localUser'); location.reload(); }
 
         function switchView(viewName) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('view-active'));
             document.getElementById(`view-${viewName}`).classList.add('view-active');
-            
             if (viewName === 'dashboard') updateDashboard();
             if (viewName === 'workout') renderActiveWorkout();
             if (viewName === 'manager') renderSplitManager();
             if (viewName === 'editor') renderSplitEditor();
-            if (viewName === 'weight') updateWeightUI();
             if (viewName === 'stretches') renderStretchBoard();
         }
 
-        // --- DASHBOARD & DYNAMIC PROGRESS MATH ---
+        // --- CUSTOM GOALS ---
+        function editStepGoal() {
+            let current = currentUser.stepGoal || 7000;
+            let newGoal = prompt("Enter your daily step target:", current);
+            if(newGoal && !isNaN(newGoal)) { currentUser.stepGoal = parseInt(newGoal); localStorage.setItem('localUser', JSON.stringify(currentUser)); renderMissions(); }
+        }
+
         function updateDashboard() {
             document.getElementById('welcomeMessage').innerText = `Ahlan, ${currentUser.name} 👋`;
-            
             let dates = Object.keys(weights).sort().reverse();
-            if (dates.length > 0) {
-                document.getElementById('dashWeight').innerText = weights[dates[0]] + " kg";
-                let sum = 0, count = Math.min(dates.length, 7);
-                for(let i=0; i<count; i++) sum += weights[dates[i]];
-                document.getElementById('dashAvg').innerText = (sum/count).toFixed(2) + " kg";
-            } else {
-                document.getElementById('dashWeight').innerText = "-- kg";
-                document.getElementById('dashAvg').innerText = "-- kg";
-            }
-            
+            if (dates.length > 0) { document.getElementById('dashWeight').innerText = weights[dates[0]] + " kg"; } 
             document.getElementById('dashSplit').innerText = (activeSplitIndex >= 0 && allSplits[activeSplitIndex]) ? allSplits[activeSplitIndex].name : "No Plan";
-            
             renderMissions();
         }
 
-        function toggleMainMission(mission) {
-            dailyMissions[mission] = document.getElementById(`mission${mission.charAt(0).toUpperCase() + mission.slice(1)}`).checked;
-            saveData();
-            renderMissions();
-        }
+        function toggleMainMission(mission) { dailyMissions[mission] = document.getElementById(`mission${mission.charAt(0).toUpperCase() + mission.slice(1)}`).checked; saveData(); renderMissions(); }
 
         function renderMissions() {
-            document.getElementById('missionSteps').checked = dailyMissions.steps;
-            document.getElementById('rowSteps').style.background = dailyMissions.steps ? '#10b981' : '#1e293b';
+            let targetSteps = currentUser.stepGoal || 7000;
+            document.getElementById('stepGoalText').innerText = `🚶‍♂️ ${targetSteps.toLocaleString()} Steps`;
+            document.getElementById('missionSteps').checked = dailyMissions.steps; document.getElementById('rowSteps').style.background = dailyMissions.steps ? '#10b981' : '#1e293b';
+            document.getElementById('missionHang').checked = dailyMissions.hang; document.getElementById('rowHang').style.background = dailyMissions.hang ? '#10b981' : '#1e293b';
             
-            document.getElementById('missionHang').checked = dailyMissions.hang;
-            document.getElementById('rowHang').style.background = dailyMissions.hang ? '#10b981' : '#1e293b';
+            let stretchesDone = 0; STRETCH_ROUTINE.forEach(s => { if(dailyMissions.stretches[s.id]) stretchesDone++; });
+            document.getElementById('stretchDashText').innerText = `🧘‍♂️ Mobility Routine (${stretchesDone}/5)`;
             
-            let stretchesDone = 0;
-            STRETCH_ROUTINE.forEach(stretch => {
-                if(dailyMissions.stretches[stretch.id]) stretchesDone++;
-            });
-            
-            document.getElementById('stretchDashText').innerText = `🧘‍♂️ Mobility Routine (${stretchesDone}/${STRETCH_ROUTINE.length})`;
-            document.getElementById('rowStretches').style.background = (stretchesDone === STRETCH_ROUTINE.length) ? '#10b981' : '#1e293b';
-
-            let progress = 0;
-            if (dailyMissions.steps) progress += 33.33;
-            if (dailyMissions.hang) progress += 33.33;
-            
-            let stretchValueEach = 33.34 / STRETCH_ROUTINE.length;
-            progress += (stretchesDone * stretchValueEach);
-            
-            let roundedProgress = Math.round(progress);
-            if(roundedProgress > 100) roundedProgress = 100;
-            
-            document.getElementById('missionPercent').innerText = `${roundedProgress}%`;
-            document.getElementById('missionProgressBar').style.width = `${roundedProgress}%`;
-
-            let quoteEl = document.getElementById('missionQuote');
-            if (roundedProgress === 100) {
-                quoteEl.style.display = 'block';
-                quoteEl.innerText = "All daily goals complete. Excellent work. 🏆";
-            } else {
-                quoteEl.style.display = 'none';
-            }
+            let progress = (dailyMissions.steps ? 33.33 : 0) + (dailyMissions.hang ? 33.33 : 0) + (stretchesDone * (33.34/5));
+            let rp = Math.min(Math.round(progress), 100);
+            document.getElementById('missionPercent').innerText = `${rp}%`; document.getElementById('missionProgressBar').style.width = `${rp}%`;
         }
 
-        // --- THE DEDICATED STRETCH BOARD ---
+        // --- STRETCH BOARD ---
         function renderStretchBoard() {
-            let container = document.getElementById('stretchContainer');
-
-            let html = STRETCH_ROUTINE.map(stretch => {
-                let isChecked = dailyMissions.stretches[stretch.id];
-                
-                let isVideo = stretch.media.endsWith('.mp4');
-                let fallback = "onerror=\"this.onerror=null; this.src='https://placehold.co/100x100/e2e8f0/0f172a?text=Media+Missing';\"";
-                
-                let mediaElement = isVideo 
-                    ? `<video src="${stretch.media}" class="stretch-img" autoplay loop muted playsinline></video>`
-                    : `<img src="${stretch.media}" class="stretch-img" alt="${stretch.name}" ${fallback}>`;
-
-                return `
-                <div class="stretch-card" onclick="toggleBoardStretch('${stretch.id}')" style="${isChecked ? 'opacity: 0.6;' : ''}">
-                    ${mediaElement}
-                    <div class="stretch-info">
-                        <h3>${stretch.name}</h3>
-                        <p>${stretch.desc}</p>
-                    </div>
-                    <input type="checkbox" class="stretch-check" id="check_${stretch.id}" ${isChecked ? 'checked' : ''} onclick="event.stopPropagation(); toggleBoardStretch('${stretch.id}')">
-                </div>
-                `;
+            document.getElementById('stretchContainer').innerHTML = STRETCH_ROUTINE.map(s => {
+                let check = dailyMissions.stretches[s.id]; let media = s.media.endsWith('.mp4') ? `<video src="${s.media}" class="stretch-img" autoplay loop muted playsinline></video>` : `<img src="${s.media}" class="stretch-img">`;
+                return `<div class="stretch-card" onclick="toggleStretch('${s.id}')" style="${check ? 'opacity:0.6;' : ''}">${media}<div class="stretch-info"><h3>${s.name}</h3></div><input type="checkbox" class="stretch-check" ${check ? 'checked' : ''}></div>`;
             }).join('');
-            
-            container.innerHTML = html;
         }
+        function toggleStretch(id) { dailyMissions.stretches[id] = !dailyMissions.stretches[id]; saveData(); renderStretchBoard(); renderMissions(); }
 
-        function toggleBoardStretch(stretchId) {
-            dailyMissions.stretches[stretchId] = !dailyMissions.stretches[stretchId];
-            saveData();
-            renderStretchBoard();
-            renderMissions();
-        }
-
-        // --- WEIGHT LOGIC & RESET ---
-        function logWeight() {
-            let d = document.getElementById('weightDate').value, w = parseFloat(document.getElementById('weightValue').value);
-            if (!d || !w || d > todayStr) return; weights[d] = w; saveData(); document.getElementById('weightValue').value = ""; updateWeightUI();
-        }
-        function resetWeightHistory() {
-            let newWeight = prompt("Enter your current weight (kg) to start fresh:");
-            if (newWeight !== null && newWeight !== "") {
-                let parsedWeight = parseFloat(newWeight);
-                if (!isNaN(parsedWeight)) {
-                    if(confirm("This permanently deletes all past weight entries. Proceed?")) {
-                        weights = {}; weights[todayStr] = parsedWeight; saveData(); updateWeightUI();
-                    }
-                } else { alert("Invalid number."); }
-            }
-        }
-        function updateWeightUI() { document.getElementById('weightHistory').innerHTML = Object.keys(weights).sort().reverse().map(d => `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #e2e8f0;"><span>${d}</span><strong>${weights[d]} kg</strong></div>`).join(''); }
-
-        // --- ACTIVE WORKOUT (GHOST SETS & TIMER) ---
-        function startTimer() {
-            let timerEl = document.getElementById('restTimer'); timerEl.style.display = 'block'; let time = 90; clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                let m = Math.floor(time / 60); let s = time % 60; timerEl.innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
-                if (time <= 0) { clearInterval(timerInterval); timerEl.style.background = '#ef4444'; timerEl.style.color = '#fff'; timerEl.innerText = "GO!"; setTimeout(() => timerEl.style.display = 'none', 3000); }
-                time--;
-            }, 1000);
-        }
-        function stopTimer() { clearInterval(timerInterval); document.getElementById('restTimer').style.display = 'none'; }
-        function saveSet(exIndex, setIndex) {
-            let w = document.getElementById(`w_${exIndex}_${setIndex}`).value; let r = document.getElementById(`r_${exIndex}_${setIndex}`).value;
-            allSplits[activeSplitIndex].days[activeWorkoutDayIndex].exercises[exIndex].sets[setIndex].w = w; allSplits[activeSplitIndex].days[activeWorkoutDayIndex].exercises[exIndex].sets[setIndex].r = r;
-            saveData();
-            let btn = document.getElementById(`btn_${exIndex}_${setIndex}`); btn.innerText = "✓"; btn.style.background = "#10b981";
-            setTimeout(() => { btn.innerText = "SAVE"; btn.style.background = "#2563eb"; }, 1000);
-            renderActiveWorkout(); 
-            let timerEl = document.getElementById('restTimer'); timerEl.style.background = '#0f172a'; timerEl.style.color = '#10b981'; startTimer();
-        }
-        function finishWorkout() {
-            if(confirm("Finish session? This logs volume and sets today's numbers as Ghost Sets for next week.")) {
-                allSplits[activeSplitIndex].days[activeWorkoutDayIndex].exercises.forEach(ex => { ex.sets.forEach(set => { if (set.w || set.r) { set.prevW = set.w; set.prevR = set.r; set.w = ""; set.r = ""; }});});
-                saveData(); renderActiveWorkout();
-            }
-        }
+        // --- ACTIVE WORKOUT ---
         function renderActiveWorkout() {
             let container = document.getElementById('workoutContent');
-            if (activeSplitIndex < 0 || !allSplits[activeSplitIndex]) {
-                document.getElementById('workoutTitle').innerText = "No Plan Selected"; container.innerHTML = `<button onclick="switchView('manager')">Go to Split Library</button>`; return;
-            }
+            if (activeSplitIndex < 0 || !allSplits[activeSplitIndex]) return container.innerHTML = `<button onclick="switchView('manager')">Select a Plan</button>`;
             let split = allSplits[activeSplitIndex]; document.getElementById('workoutTitle').innerText = split.name;
-            let tabsHTML = split.days.map((day, idx) => `<div class="tab ${idx === activeWorkoutDayIndex ? 'active' : ''}" onclick="activeWorkoutDayIndex=${idx}; renderActiveWorkout()">${day.name}</div>`).join('');
-            let totalVolume = 0;
-            let exercisesHTML = split.days[activeWorkoutDayIndex].exercises.map((ex, exIndex) => {
-                let setsHTML = ex.sets.map((set, setIndex) => {
-                    if (set.w && set.r) totalVolume += (parseFloat(set.w) * parseInt(set.r));
-                    return `<div class="set-row"><span style="font-size:12px; color:#64748b; font-weight:bold;">SET ${setIndex + 1}</span><div class="row"><div class="input-wrapper"><input type="number" id="w_${exIndex}_${setIndex}" placeholder="${set.prevW || '-'}" value="${set.w || ''}"><span class="unit">kg</span></div><div class="input-wrapper"><input type="number" id="r_${exIndex}_${setIndex}" placeholder="${set.prevR || '-'}" value="${set.r || ''}"><span class="unit">reps</span></div><button class="btn-small" id="btn_${exIndex}_${setIndex}" onclick="saveSet(${exIndex}, ${setIndex})">SAVE</button></div></div>`;
-                }).join('');
-                return `<div class="card"><h3 style="margin: 0 0 12px 0; font-size:16px;">${ex.name}</h3>${setsHTML}</div>`;
+            let tabs = split.days.map((day, idx) => `<div class="tab ${idx === activeWorkoutDayIndex ? 'active' : ''}" onclick="activeWorkoutDayIndex=${idx}; renderActiveWorkout()">${day.name}</div>`).join('');
+            
+            let exercises = split.days[activeWorkoutDayIndex].exercises.map((ex, exIndex) => {
+                let imgHTML = ex.img ? `<img src="${ex.img}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; margin-right:10px;" onerror="this.src='https://placehold.co/40/e2e8f0/0f172a?text=Ex'">` : '';
+                let setsHTML = ex.sets.map((set, setIndex) => `<div class="set-row"><span style="font-size:12px; color:#64748b; font-weight:bold;">SET ${setIndex + 1}</span><div class="row"><div class="input-wrapper"><input type="number" id="w_${exIndex}_${setIndex}" value="${set.w || ''}"><span class="unit">kg</span></div><div class="input-wrapper"><input type="number" id="r_${exIndex}_${setIndex}" value="${set.r || ''}"><span class="unit">reps</span></div><button class="btn-small" onclick="saveSet(${exIndex}, ${setIndex})">SAVE</button></div></div>`).join('');
+                return `<div class="card"><div style="display:flex; align-items:center; margin-bottom:12px;">${imgHTML}<h3 style="margin:0;">${ex.name}</h3></div>${setsHTML}</div>`;
             }).join('');
-            container.innerHTML = `<div class="tabs">${tabsHTML}</div><div class="card" style="background:#0f172a; color:#fff; border:none; text-align:center;"><span style="font-size:12px; color:#cbd5e1;">TODAY'S VOLUME</span><div style="font-size:24px; font-weight:bold; color:#10b981;">${totalVolume.toLocaleString()} kg</div></div>${exercisesHTML}<button onclick="finishWorkout()" style="background:#10b981; margin-top:20px;">Finish & Lock Ghost Sets</button>`;
+            container.innerHTML = `<div class="tabs">${tabs}</div>${exercises}<button onclick="switchView('dashboard')" style="background:#10b981; margin-top:20px;">Finish Session</button>`;
         }
+        function saveSet(ex, set) { allSplits[activeSplitIndex].days[activeWorkoutDayIndex].exercises[ex].sets[set].w = document.getElementById(`w_${ex}_${set}`).value; allSplits[activeSplitIndex].days[activeWorkoutDayIndex].exercises[ex].sets[set].r = document.getElementById(`r_${ex}_${set}`).value; saveData(); }
 
-        // --- SPLIT MANAGER & EDITOR ---
+        // --- SPLIT EDITOR & LIBRARY ---
         function renderSplitManager() {
-            let list = document.getElementById('managerList');
-            if (allSplits.length === 0) return list.innerHTML = `<p>Library empty.</p>`;
-            list.innerHTML = allSplits.map((split, index) => {
-                let isActive = (index === activeSplitIndex);
-                return `<div class="split-item ${isActive ? 'active-split' : ''}"><div><strong style="display:block;">${split.name}</strong><span style="font-size:12px; color:#64748b;">${split.days.length} Days</span></div><div style="display:flex; gap:6px;">${!isActive ? `<button class="btn-small" style="background:#10b981;" onclick="setActiveSplit(${index})">Activate</button>` : `<span style="font-size:12px; font-weight:bold; color:#10b981; padding:6px;">ACTIVE</span>`}<button class="btn-small" style="background:#334155;" onclick="openEditor(${index})">Edit</button><button class="btn-small" style="background:#ef4444;" onclick="deleteSplit(${index})">Del</button></div></div>`;
-            }).join('');
+            document.getElementById('managerList').innerHTML = allSplits.map((s, i) => `<div class="split-item ${i === activeSplitIndex ? 'active-split' : ''}"><div><strong>${s.name}</strong></div><div style="display:flex; gap:6px;"><button class="btn-small" style="background:#10b981;" onclick="activeSplitIndex=${i}; saveData(); renderSplitManager();">Act</button><button class="btn-small" style="background:#334155;" onclick="editingSplitIndex=${i}; editingDayIndex=0; switchView('editor');">Edit</button></div></div>`).join('');
         }
-        function createNewSplit() {
-            let name = prompt("Split Name:"); if (!name) return; let days = parseInt(prompt("How many days?")); if (!days) return;
-            let newSplit = { name: name, days: [] }; for(let i=0; i<days; i++) newSplit.days.push({ name: prompt(`Name Day ${i+1}:`) || `Day ${i+1}`, exercises: [] });
-            allSplits.push(newSplit); saveData(); openEditor(allSplits.length - 1);
-        }
-        function setActiveSplit(index) { activeSplitIndex = index; activeWorkoutDayIndex = 0; saveData(); renderSplitManager(); }
-        function deleteSplit(index) { if(confirm("Delete?")) { allSplits.splice(index, 1); if (activeSplitIndex === index) activeSplitIndex = -1; else if (activeSplitIndex > index) activeSplitIndex--; saveData(); renderSplitManager(); } }
+        function createNewSplit() { let name = prompt("Name:"); if(!name) return; allSplits.push({name: name, days:[{name:"Day 1", exercises:[]}]}); saveData(); renderSplitManager(); }
         
-        function openEditor(index) { editingSplitIndex = index; editingDayIndex = 0; switchView('editor'); }
-        function addExerciseToEditor() {
-            let name = document.getElementById('editExName').value.trim(); if (!name) return;
-            allSplits[editingSplitIndex].days[editingDayIndex].exercises.push({ name: name, sets: [{w:"", r:"", prevW:"", prevR:""},{w:"", r:"", prevW:"", prevR:""},{w:"", r:"", prevW:"", prevR:""}] });
-            saveData(); renderSplitEditor();
-        }
-        function removeExerciseFromEditor(exIndex) { allSplits[editingSplitIndex].days[editingDayIndex].exercises.splice(exIndex, 1); saveData(); renderSplitEditor(); }
-        function adjustEditorSets(exIndex, change) {
-            let s = allSplits[editingSplitIndex].days[editingDayIndex].exercises[exIndex].sets;
-            if(change===1) s.push({w:"", r:"", prevW:"", prevR:""}); else if(change===-1 && s.length>1) s.pop();
-            saveData(); renderSplitEditor();
-        }
         function renderSplitEditor() {
             let split = allSplits[editingSplitIndex];
-            let tabsHTML = split.days.map((day, idx) => `<div class="tab ${idx === editingDayIndex ? 'active' : ''}" onclick="editingDayIndex=${idx}; renderSplitEditor()">${day.name}</div>`).join('');
-            let exercisesHTML = split.days[editingDayIndex].exercises.map((ex, exIndex) => `<div class="card"><div class="ex-header"><h3 style="margin:0;">${ex.name}</h3><div class="ex-actions"><button class="ex-btn" onclick="adjustEditorSets(${exIndex}, 1)">+ Set</button><button class="ex-btn" onclick="adjustEditorSets(${exIndex}, -1)">- Set</button><button class="ex-btn del" onclick="removeExerciseFromEditor(${exIndex})">X</button></div></div><p style="font-size:12px; margin:0;">${ex.sets.length} Sets</p></div>`).join('');
-            document.getElementById('editorContent').innerHTML = `<div class="tabs">${tabsHTML}</div><div class="card"><input type="text" id="editExName" placeholder="New Exercise"><button onclick="addExerciseToEditor()">Add</button></div>${exercisesHTML}`;
+            let tabs = split.days.map((day, idx) => `<div class="tab ${idx === editingDayIndex ? 'active' : ''}" onclick="editingDayIndex=${idx}; renderSplitEditor()">${day.name}</div>`).join('');
+            
+            let exHTML = split.days[editingDayIndex].exercises.map((ex, exIndex) => {
+                let imgHTML = ex.img ? `<img src="${ex.img}" style="width:35px; height:35px; border-radius:4px; object-fit:cover; margin-right:10px;" onerror="this.src='https://placehold.co/35/e2e8f0/0f172a?text=Ex'">` : '';
+                return `<div class="card"><div class="ex-header"><div style="display:flex; align-items:center;">${imgHTML}<h3 style="margin:0; font-size:15px;">${ex.name}</h3></div><div class="ex-actions"><button class="ex-btn del" onclick="allSplits[editingSplitIndex].days[editingDayIndex].exercises.splice(${exIndex}, 1); saveData(); renderSplitEditor();">X</button></div></div></div>`;
+            }).join('');
+            document.getElementById('editorContent').innerHTML = `<div class="tabs">${tabs}</div><button onclick="openLibrary()" style="margin-bottom:15px; background:#0f172a;">+ Browse Exercise Library</button>${exHTML}`;
+        }
+
+        // --- LIBRARY LOGIC ---
+        function openLibrary() {
+            let content = "";
+            for (const [muscle, subregions] of Object.entries(EXERCISE_DB)) {
+                content += `<div class="lib-group"><div class="lib-group-title" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">${muscle} <span>▼</span></div><div style="display:none;">`;
+                for (const [sub, exercises] of Object.entries(subregions)) {
+                    content += `<div class="lib-subgroup"><div class="lib-subgroup-title">${sub}</div>`;
+                    exercises.forEach(ex => {
+                        content += `<div class="lib-exercise" onclick="addExercise('${ex.name}', '${ex.img}')"><img src="${ex.img}" class="lib-thumb" onerror="this.src='https://placehold.co/45/e2e8f0/0f172a?text=Add'"><span style="font-weight:bold; color:#0f172a;">${ex.name}</span></div>`;
+                    });
+                    content += `</div>`;
+                }
+                content += `</div></div>`;
+            }
+            document.getElementById('libraryContent').innerHTML = content;
+            document.getElementById('exerciseLibraryModal').style.display = 'block';
+        }
+        function closeLibrary() { document.getElementById('exerciseLibraryModal').style.display = 'none'; }
+        function addExercise(name, img) {
+            allSplits[editingSplitIndex].days[editingDayIndex].exercises.push({ name: name, img: img, sets: [{w:"", r:""},{w:"", r:""},{w:"", r:""}] });
+            saveData(); closeLibrary(); renderSplitEditor();
         }
     </script>
 </body>
