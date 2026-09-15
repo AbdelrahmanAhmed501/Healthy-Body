@@ -458,6 +458,18 @@
             saveData(); renderSplitEditor();
         }
 
+        function addCustomExercise() {
+            let name = prompt("Enter custom exercise name:");
+            if (!name || name.trim() === "") return;
+            allSplits[editingSplitIndex].days[editingDayIndex].exercises.push({ 
+                name: name.trim(), 
+                img: "", 
+                sets: [{w:"", r:""},{w:"", r:""},{w:"", r:""}] 
+            });
+            saveData(); 
+            renderSplitEditor();
+        }
+
         function renderSplitEditor() {
             let split = allSplits[editingSplitIndex];
             let tabs = split.days.map((day, idx) => `<div class="tab ${idx === editingDayIndex ? 'active' : ''}" onclick="editingDayIndex=${idx}; renderSplitEditor()">${day.name}</div>`).join('');
@@ -476,7 +488,15 @@
                     <p style="font-size:12px; margin:0; color:#64748b;">${ex.sets.length} Sets</p>
                 </div>`;
             }).join('');
-            document.getElementById('editorContent').innerHTML = `<div class="tabs">${tabs}</div><button onclick="openLibrary()" style="margin-bottom:15px; background:#0f172a;">+ Browse Exercise Library</button>${exHTML}`;
+            
+            document.getElementById('editorContent').innerHTML = `
+                <div class="tabs">${tabs}</div>
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <button onclick="openLibrary()" style="background:#0f172a; flex:1;">+ Library</button>
+                    <button onclick="addCustomExercise()" style="background:#475569; flex:1;">+ Custom</button>
+                </div>
+                ${exHTML}
+            `;
         }
 
         // --- LIBRARY LOGIC ---
